@@ -2,6 +2,7 @@
   (:require [pl.danieljanus.tagsoup :refer :all])
   (:gen-class))
 
+(defn first-attrebute [node] (get node 2))
 
 (defn get-links []
 " 1) Find all elements containing {:class \"r\"}.
@@ -21,7 +22,16 @@ The link from the example above is 'https://github.com/clojure/clojure'.
 Example: ['https://github.com/clojure/clojure', 'http://clojure.com/', . . .]
 "
   (let [data (parse "clojure_google.html")]
-    nil))
+    (defn search-link?[vector]
+      (= (:class (get vector attributes)) "r"))
+    (defn href[vector]
+      (:href (get (get vector attributes) tag)))
+    (defn elements[html-source]
+      (let [vectors (filter vector? html-source)]
+        (remove empty?
+          (concat (map elements (remove search-link? vectors))
+            (map href (filter search-link? vectors))))))
+    (apply vector (flatten (elements data)))))
 
 (defn -main []
   (println (str "Found " (count (get-links)) " links!")))
