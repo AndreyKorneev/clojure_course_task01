@@ -22,16 +22,15 @@
   Example: ['https://github.com/clojure/clojure', 'http://clojure.com/', . . .]
   "
   (let [data (parse "clojure_google.html")]
-    (defn search-link?[vector]
-      (= (:class (attributes vector)) "r"))
-    (defn href[vector]
-      (:href (attributes (first-attribute vector))))
-    (defn elements[html-source]
-      (let [vectors (filter vector? html-source)]
-        (remove empty?
-          (concat (map elements (remove search-link? vectors))
-            (map href (filter search-link? vectors))))))
-    (apply vector (flatten (elements data)))))
+    (letfn [(search-link?[vector]
+              (= (:class (attributes vector)) "r"))
+            (href[vector]
+              (:href (attributes (first-attribute vector))))
+            (elements[html-source]
+              (let [vectors (filter vector? html-source)]
+                (concat (mapcat elements (remove search-link? vectors))
+                  (map href (filter search-link? vectors)))))]
+    (vec (elements data)))))
 
 (defn -main []
   (println (str "Found " (count (get-links)) " links!")))
